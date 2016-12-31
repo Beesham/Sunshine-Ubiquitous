@@ -40,13 +40,21 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import static android.R.attr.x;
+
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
  * low-bit ambient mode, the text is drawn without anti-aliasing in ambient mode.
  */
 public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
+
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
+    private static final Typeface BOLD_TYPEFACE =
+            Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
+    private static final Typeface THIN_TYPEFACE =
+            Typeface.create("sans-serif-light", Typeface.NORMAL);
+
 
     /**
      * Update rate in milliseconds for interactive mode. We update once a second since seconds are
@@ -87,8 +95,17 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
     private class Engine extends CanvasWatchFaceService.Engine {
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         boolean mRegisteredTimeZoneReceiver = false;
+
         Paint mBackgroundPaint;
-        Paint mTextPaint;
+        //Paint mTextPaint;
+        Paint mHourPaint;
+        Paint mMinutePaint;
+        Paint mDatePaint;
+        Paint mHighPaint;
+        Paint mLowPaint;
+        Paint mIconPaint; //TODO
+        Paint mColonPaint;
+
         boolean mAmbient;
         Calendar mCalendar;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -123,8 +140,17 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
-            mTextPaint = new Paint();
-            mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
+            //mTextPaint = new Paint();
+            //mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
+
+            mHourPaint = new Paint();
+            mHourPaint = createTextPaint(resources.getColor(R.color.white), NORMAL_TYPEFACE);
+
+            mColonPaint = new Paint();
+            mColonPaint = createTextPaint(resources.getColor(R.color.white), NORMAL_TYPEFACE);
+
+            mMinutePaint = new Paint();
+            mMinutePaint = createTextPaint(resources.getColor(R.color.white), THIN_TYPEFACE);
 
             mCalendar = Calendar.getInstance();
         }
@@ -139,6 +165,14 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             Paint paint = new Paint();
             paint.setColor(textColor);
             paint.setTypeface(NORMAL_TYPEFACE);
+            paint.setAntiAlias(true);
+            return paint;
+        }
+
+        private Paint createTextPaint(int defaultInteractiveColor, Typeface typeface) {
+            Paint paint = new Paint();
+            paint.setColor(defaultInteractiveColor);
+            paint.setTypeface(typeface);
             paint.setAntiAlias(true);
             return paint;
         }
@@ -191,7 +225,10 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             float textSize = resources.getDimension(isRound
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
 
-            mTextPaint.setTextSize(textSize);
+            mHourPaint.setTextSize(textSize);
+            mColonPaint.setTextSize(textSize);
+            mMinutePaint.setTextSize(textSize);
+
         }
 
         @Override
@@ -212,7 +249,9 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
-                    mTextPaint.setAntiAlias(!inAmbientMode);
+                    mHourPaint.setAntiAlias(!inAmbientMode);
+                    mColonPaint.setAntiAlias(!inAmbientMode);
+                    mMinutePaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -258,12 +297,22 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
 
-            String text = mAmbient
-                    ? String.format("%d:%02d", mCalendar.get(Calendar.HOUR),
-                    mCalendar.get(Calendar.MINUTE))
-                    : String.format("%d:%02d:%02d", mCalendar.get(Calendar.HOUR),
-                    mCalendar.get(Calendar.MINUTE), mCalendar.get(Calendar.SECOND));
-            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+            String hour = String.format("%d", mCalendar.get(Calendar.HOUR));
+            String minutes = String.format("%02d", mCalendar.get(Calendar.MINUTE));
+
+            float xOffset =
+                    (mHourPaint.measureText(hour) +
+                    mColonPaint.measureText(":") +
+                    mMinutePaint.measureText(minutes));//mXOffset;
+
+            canvas.drawText(hour, bounds.centerX() - (xOffset/2f), mYOffset, mHourPaint);
+
+            //xOffset += mHourPaint.measureText(hour);
+            canvas.drawText(":", bounds.centerX() - (mColonPaint.measureText(":")/2f), mYOffset, mColonPaint);
+
+            //xOffset += mColonPaint.measureText(":");
+            canvas.drawText(minutes, bounds.centerX() + (mColonPaint.measureText(":")), mYOffset, mMinutePaint);
+
         }
 
         /**
