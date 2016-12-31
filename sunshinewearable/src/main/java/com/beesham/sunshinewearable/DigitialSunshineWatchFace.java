@@ -42,6 +42,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import static android.R.attr.resource;
 import static android.R.attr.x;
 
 /**
@@ -109,6 +110,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
         Paint mLowPaint;
         Paint mIconPaint; //TODO
         Paint mColonPaint;
+        Paint mDividerPaint;
 
         boolean mAmbient;
         Calendar mCalendar;
@@ -167,12 +169,23 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
             mDateString = simpleDateFormat.format(mCalendar.DATE);
 
+            mDividerPaint = new Paint();
+            mDividerPaint = createDividerPaint();
+
         }
 
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
             super.onDestroy();
+        }
+
+        private Paint createDividerPaint(){
+            Paint paint = new Paint();
+            paint.setStrokeWidth(1f);
+            paint.setColor(getResources().getColor(R.color.light_grey));
+
+            return paint;
         }
 
         private Paint createTextPaint(int textColor) {
@@ -327,7 +340,9 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             //xOffset += mColonPaint.measureText(":");
             canvas.drawText(minutes, bounds.centerX() + (mColonPaint.measureText(":")), mYOffset, mMinutePaint);
 
-            canvas.drawText(mDateString, bounds.centerX() - ((mDatePaint.measureText(mDateString)/2)), mYOffset + 16f, mDatePaint);
+            canvas.drawText(mDateString, bounds.centerX() - ((mDatePaint.measureText(mDateString)/2)), mYOffset + 16, mDatePaint);
+
+            canvas.drawLine(bounds.centerX(), bounds.centerY(), bounds.centerX() + 20f, bounds.centerY(), mDividerPaint);
 
         }
 
