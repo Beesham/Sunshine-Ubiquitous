@@ -31,11 +31,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +49,8 @@ import static android.R.attr.x;
  * low-bit ambient mode, the text is drawn without anti-aliasing in ambient mode.
  */
 public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
+
+    private static final String LOG_TAG = DigitialSunshineWatchFace.class.getSimpleName();
 
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
@@ -108,6 +112,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
         boolean mAmbient;
         Calendar mCalendar;
+        String mDateString;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -123,6 +128,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
          * disable anti-aliasing in ambient mode.
          */
         boolean mLowBitAmbient;
+
+        SimpleDateFormat simpleDateFormat;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -152,7 +159,14 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             mMinutePaint = new Paint();
             mMinutePaint = createTextPaint(resources.getColor(R.color.white), THIN_TYPEFACE);
 
+            mDatePaint = new Paint();
+            mDatePaint = createTextPaint(resources.getColor(R.color.light_grey));
+
             mCalendar = Calendar.getInstance();
+
+            simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
+            mDateString = simpleDateFormat.format(mCalendar.DATE);
+
         }
 
         @Override
@@ -312,6 +326,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             //xOffset += mColonPaint.measureText(":");
             canvas.drawText(minutes, bounds.centerX() + (mColonPaint.measureText(":")), mYOffset, mMinutePaint);
+
+            canvas.drawText(mDateString, bounds.centerX() - ((mDatePaint.measureText(mDateString)/2)), mYOffset + 16f, mDatePaint);
 
         }
 
