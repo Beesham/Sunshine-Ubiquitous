@@ -60,8 +60,6 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
                     .addApi(Wearable.API)
                     .build();
             mGoogleApiClient.connect();
-
-            sendWeatherData();
             Log.v(LOG_TAG, "service started");
         }
     }
@@ -82,10 +80,8 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
                         if(!dataItemResult.getStatus().isSuccess()){
                             Log.v(LOG_TAG, "Sucess stored locally");
                         }else{
-                            Log.v(LOG_TAG, "not sucess stored locally:" +  dataItemResult.toString());
+                            Log.v(LOG_TAG, "not sucess stored locally" );
                         }
-
-
                     }
                 });
 
@@ -112,6 +108,7 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.v(LOG_TAG, "Connected");
+        sendWeatherData();
     }
 
     @Override

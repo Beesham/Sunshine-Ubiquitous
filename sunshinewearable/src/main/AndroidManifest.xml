@@ -32,16 +32,21 @@
 
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE"/>
             </intent-filter>
+
+            <action
+                    android:name="com.google.android.gms.wearable.BIND_LISTENER"/>
         </service>
 
+        <!--
         <service android:name=".DigitialSunshineWatchFace$WeatherListenerService">
             <intent-filter>
                 <action
                     android:name="com.google.android.gms.wearable.BIND_LISTENER"/>
-                <!-- listeners receive events that match the action and data filters -->
-
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                < listeners receive events that match the action and data filters -->
+<!--
             </intent-filter>
-        </service>
+        </service-->
 
         <meta-data
                 android:name="com.google.android.gms.version"

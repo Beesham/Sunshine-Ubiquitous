@@ -16,10 +16,14 @@
 
 package com.beesham.sunshinewearable;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import android.content.BroadcastReceiver;
@@ -35,6 +39,8 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
@@ -105,7 +111,9 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
         }
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine {
+    private class Engine extends CanvasWatchFaceService.Engine implements DataApi.DataListener,
+            GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         boolean mRegisteredTimeZoneReceiver = false;
 
@@ -140,6 +148,12 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
         boolean mLowBitAmbient;
 
         SimpleDateFormat simpleDateFormat;
+
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(DigitialSunshineWatchFace.this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Wearable.API)
+                .build();
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -223,6 +237,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             super.onVisibilityChanged(visible);
 
             if (visible) {
+                mGoogleApiClient.connect();
                 registerReceiver();
 
                 // Update time zone in case it changed while we weren't visible.
@@ -230,6 +245,11 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                 invalidate();
             } else {
                 unregisterReceiver();
+
+                if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                    Wearable.DataApi.removeListener(mGoogleApiClient, this);
+                    mGoogleApiClient.disconnect();
+                }
             }
 
             // Whether the timer should be running depends on whether we're visible (as well as
@@ -394,9 +414,42 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                 mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
             }
         }
+
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+            Log.v(LOG_TAG, "connected");
+            Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+            Log.v(LOG_TAG, "connect sus");
+        }
+
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+            Log.v(LOG_TAG, "connect failed");
+        }
+
+        @Override
+        public void onDataChanged(DataEventBuffer dataEventBuffer) {
+            Log.v(LOG_TAG, "onDataChanged");
+
+            for(DataEvent dataEvent : dataEventBuffer){
+                if(dataEvent.getType() == DataEvent.TYPE_CHANGED){
+                    DataMap dataMap = DataMapItem.fromDataItem(
+                            dataEvent.getDataItem()).getDataMap();
+                    String path = dataEvent.getDataItem().getUri().getPath();
+                    if(path.equals("/weather")){
+                        minTemp = dataMap.getString("weather.min");
+                        Log.v(LOG_TAG, "data on wearable");
+                    }
+                }
+            }
+        }
     }
 
-    public class WeatherListenerService extends WearableListenerService{
+   /* public class WeatherListenerService extends WearableListenerService{
         @Override
         public void onDataChanged(DataEventBuffer dataEventBuffer) {
             super.onDataChanged(dataEventBuffer);
@@ -414,5 +467,5 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                 }
             }
         }
-    }
+    }*/
 }
