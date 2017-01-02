@@ -180,6 +180,9 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             mDividerPaint = new Paint();
             mDividerPaint = createDividerPaint();
 
+            mHighPaint = new Paint();
+            mHighPaint = createTextPaint(resources.getColor(R.color.light_grey));
+
             mLowPaint = new Paint();
             mLowPaint = createTextPaint(resources.getColor(R.color.light_grey));
 
@@ -356,8 +359,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             canvas.drawLine(bounds.centerX(), bounds.centerY(), bounds.centerX() + 20f, bounds.centerY(), mDividerPaint);
 
-            canvas.drawText(minTemp, mXOffset, mYOffset, mLowPaint);
-
+            canvas.drawText("25", bounds.centerX(), bounds.centerY() + 20f, mHighPaint);
+            canvas.drawText("10", bounds.centerX()+20f, bounds.centerY() + 20f, mLowPaint);
         }
 
         /**
