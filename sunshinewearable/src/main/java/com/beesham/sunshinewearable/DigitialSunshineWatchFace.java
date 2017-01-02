@@ -16,6 +16,12 @@
 
 package com.beesham.sunshinewearable;
 
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.WearableListenerService;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -59,6 +65,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
     private static final Typeface THIN_TYPEFACE =
             Typeface.create("sans-serif-light", Typeface.NORMAL);
+
+    String minTemp = "0";
 
 
     /**
@@ -171,6 +179,9 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             mDividerPaint = new Paint();
             mDividerPaint = createDividerPaint();
+
+            mLowPaint = new Paint();
+            mLowPaint = createTextPaint(resources.getColor(R.color.light_grey));
 
         }
 
@@ -306,6 +317,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                     // TODO: Add code to handle the tap gesture.
                     Toast.makeText(getApplicationContext(), R.string.message, Toast.LENGTH_SHORT)
                             .show();
+                    Log.v(LOG_TAG, "Face tapped");
                     break;
             }
             invalidate();
@@ -340,9 +352,11 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             //xOffset += mColonPaint.measureText(":");
             canvas.drawText(minutes, bounds.centerX() + (mColonPaint.measureText(":")), mYOffset, mMinutePaint);
 
-            canvas.drawText(mDateString, bounds.centerX() - ((mDatePaint.measureText(mDateString)/2)), mYOffset + 16, mDatePaint);
+            canvas.drawText(mDateString.toUpperCase(), bounds.centerX() - ((mDatePaint.measureText(mDateString)/2)), mYOffset + 16, mDatePaint);
 
             canvas.drawLine(bounds.centerX(), bounds.centerY(), bounds.centerX() + 20f, bounds.centerY(), mDividerPaint);
+
+            canvas.drawText(minTemp, mXOffset, mYOffset, mLowPaint);
 
         }
 
@@ -375,6 +389,26 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                 long delayMs = INTERACTIVE_UPDATE_RATE_MS
                         - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
                 mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+            }
+        }
+    }
+
+    public class WeatherListenerService extends WearableListenerService{
+        @Override
+        public void onDataChanged(DataEventBuffer dataEventBuffer) {
+            super.onDataChanged(dataEventBuffer);
+            Log.v(LOG_TAG, "in On data changed");
+
+            for(DataEvent dataEvent : dataEventBuffer){
+                if(dataEvent.getType() == DataEvent.TYPE_CHANGED){
+                    DataMap dataMap = DataMapItem.fromDataItem(
+                            dataEvent.getDataItem()).getDataMap();
+                    String path = dataEvent.getDataItem().getUri().getPath();
+                    if(path.equals("/weather")){
+                        minTemp = dataMap.getString("weather.min");
+                        Log.v(LOG_TAG, "data on wearable");
+                    }
+                }
             }
         }
     }

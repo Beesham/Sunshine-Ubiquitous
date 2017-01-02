@@ -15,10 +15,15 @@
  */
 package com.example.android.sunshine.sync;
 
+import com.google.android.gms.wearable.PutDataMapRequest;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.WeatherContract;
@@ -28,7 +33,9 @@ import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 
 import java.net.URL;
 
-public class SunshineSyncTask {
+import static android.R.attr.start;
+
+public class SunshineSyncTask{
 
     /**
      * Performs the network request for updated weather, parses the JSON from that request, and
@@ -113,4 +120,5 @@ public class SunshineSyncTask {
             e.printStackTrace();
         }
     }
+
 }
