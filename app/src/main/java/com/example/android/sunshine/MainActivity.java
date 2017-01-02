@@ -241,9 +241,6 @@ public class MainActivity extends AppCompatActivity implements
         if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
         mRecyclerView.smoothScrollToPosition(mPosition);
         if (data.getCount() != 0) showWeatherDataView();
-
-        Intent i = new Intent (MainActivity.this, SunshineSyncWearableIntentService.class);
-        startService(i);
     }
 
     /**

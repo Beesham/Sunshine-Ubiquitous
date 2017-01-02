@@ -25,6 +25,7 @@ import android.database.Cursor;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import com.example.android.sunshine.MainActivity;
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.WeatherContract;
 import com.example.android.sunshine.utilities.NetworkUtils;
@@ -112,7 +113,8 @@ public class SunshineSyncTask{
                 }
 
             /* If the code reaches this point, we have successfully performed our sync */
-
+                Intent i = new Intent (context, SunshineSyncWearableIntentService.class);
+                context.startService(i);
             }
 
         } catch (Exception e) {

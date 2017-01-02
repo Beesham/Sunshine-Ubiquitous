@@ -72,7 +72,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
     private static final Typeface THIN_TYPEFACE =
             Typeface.create("sans-serif-light", Typeface.NORMAL);
 
-    String minTemp = "0";
+    String mMinTemp;
+    String mMaxTemp;
 
 
     /**
@@ -379,8 +380,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             canvas.drawLine(bounds.centerX(), bounds.centerY(), bounds.centerX() + 20f, bounds.centerY(), mDividerPaint);
 
-            canvas.drawText("25", bounds.centerX(), bounds.centerY() + 20f, mHighPaint);
-            canvas.drawText("10", bounds.centerX()+20f, bounds.centerY() + 20f, mLowPaint);
+            canvas.drawText(mMaxTemp, bounds.centerX(), bounds.centerY() + 20f, mHighPaint);
+            canvas.drawText(mMinTemp, bounds.centerX()+20f, bounds.centerY() + 20f, mLowPaint);
         }
 
         /**
@@ -418,6 +419,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
         @Override
         public void onConnected(@Nullable Bundle bundle) {
             Log.v(LOG_TAG, "connected");
+            Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_SHORT)
+                    .show();
             Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
         }
 
@@ -441,7 +444,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                             dataEvent.getDataItem()).getDataMap();
                     String path = dataEvent.getDataItem().getUri().getPath();
                     if(path.equals("/weather")){
-                        minTemp = dataMap.getString("weather.min");
+                        mMinTemp = dataMap.getString("weather.min");
+                        mMaxTemp = dataMap.getString("weather.max");
                         Log.v(LOG_TAG, "data on wearable");
                     }
                 }

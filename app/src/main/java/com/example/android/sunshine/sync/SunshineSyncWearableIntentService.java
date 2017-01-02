@@ -70,7 +70,8 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
     public void sendWeatherData(){
         PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/weather");
         putDataMapRequest.getDataMap().putString(WEATHER_MAX_DATA_KEY, "21");
-        putDataMapRequest.getDataMap().putString(WEATHER_MIN_DATA_KEY, "10");
+        putDataMapRequest.getDataMap().putString(WEATHER_MIN_DATA_KEY, "9");
+        putDataMapRequest.getDataMap().putLong("time_stamp", System.currentTimeMillis());
 
         PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
         Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest)
@@ -78,31 +79,12 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
                     @Override
                     public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
                         if(!dataItemResult.getStatus().isSuccess()){
-                            Log.v(LOG_TAG, "Sucess stored locally");
+                            Log.v(LOG_TAG, "not Sucess stored locally");
                         }else{
-                            Log.v(LOG_TAG, "not sucess stored locally" );
+                            Log.v(LOG_TAG, "sucess stored locally" );
                         }
                     }
                 });
-
-
-           /* String selection = WeatherContract.WeatherEntry.getSqlSelectForTodayOnwards();
-
-            String[] MAIN_FORECAST_PROJECTION = {
-                    WeatherContract.WeatherEntry.COLUMN_DATE,
-                    WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-                    WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-                    WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
-            };
-
-            Cursor cursor = context.getContentResolver().query(
-                    WeatherContract.WeatherEntry.CONTENT_URI,
-                    MAIN_FORECAST_PROJECTION,
-                    selection,
-                    null,
-                    null);
-
-            Log.v("SunshineSyncTask", "cursor: " + cursor.getCount());*/
     }
 
     @Override
