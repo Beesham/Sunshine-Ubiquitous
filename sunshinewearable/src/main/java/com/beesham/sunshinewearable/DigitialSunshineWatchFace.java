@@ -18,6 +18,7 @@ package com.beesham.sunshinewearable;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
@@ -31,6 +32,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -48,14 +51,17 @@ import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 import android.widget.Toast;
 
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import static android.R.attr.icon;
 import static android.R.attr.resource;
 import static android.R.attr.x;
+import static android.graphics.BitmapFactory.decodeResource;
 
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
@@ -72,8 +78,9 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
     private static final Typeface THIN_TYPEFACE =
             Typeface.create("sans-serif-light", Typeface.NORMAL);
 
-    String mMinTemp;
-    String mMaxTemp;
+    String mMinTemp = "0";
+    String mMaxTemp = "0";
+    Bitmap mIconBitmap;
 
 
     /**
@@ -382,6 +389,10 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             canvas.drawText(mMaxTemp, bounds.centerX(), bounds.centerY() + 20f, mHighPaint);
             canvas.drawText(mMinTemp, bounds.centerX()+20f, bounds.centerY() + 20f, mLowPaint);
+
+            if(mIconBitmap != null){
+                canvas.drawBitmap(mIconBitmap, bounds.centerX(), bounds.centerY(), null);
+            }
         }
 
         /**
@@ -416,6 +427,36 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             }
         }
 
+        /*public Bitmap loadBitmapFromAsset(Asset asset) {
+            if (asset == null) {
+                throw new IllegalArgumentException("Asset must be non-null");
+            }
+            ConnectionResult result =
+                    mGoogleApiClient.blockingConnect(30, TimeUnit.MILLISECONDS);
+            if (!result.isSuccess()) {
+                return null;
+            }
+            // convert asset into a file descriptor and block until it's ready
+            InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
+                    mGoogleApiClient, asset).await().getInputStream();
+            mGoogleApiClient.disconnect();
+
+            if (assetInputStream == null) {
+                Log.w(LOG_TAG, "Requested an unknown Asset.");
+                return null;
+            }
+            // decode the stream into a bitmap
+            return BitmapFactory.decodeStream(assetInputStream);
+        }
+*/
+        public Bitmap loadBitmap (int iconId){
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
+                    iconId);
+
+
+            return Bitmap.createScaledBitmap(bitmap, 25, 25, true);
+        }
+
         @Override
         public void onConnected(@Nullable Bundle bundle) {
             Log.v(LOG_TAG, "connected");
@@ -446,11 +487,69 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                     if(path.equals("/weather")){
                         mMinTemp = dataMap.getString("weather.min");
                         mMaxTemp = dataMap.getString("weather.max");
+                        //Asset iconAsset = dataMap.getAsset("icon");
+                        mIconBitmap = loadBitmap(
+                                getSmallArtResourceIdForWeatherCondition(
+                                        dataMap.getInt("iconID")));
                         Log.v(LOG_TAG, "data on wearable");
                     }
                 }
             }
+            invalidate();
         }
+    }
+
+    /**
+     * Helper method to provide the icon resource id according to the weather condition id returned
+     * by the OpenWeatherMap call. This method is very similar to
+     *
+     *
+     *
+     * The difference between these two methods is that this method provides smaller assets, used
+     * in the list item layout for a "future day", as well as
+     *
+     * @param weatherId from OpenWeatherMap API response
+     *                  See http://openweathermap.org/weather-conditions for a list of all IDs
+     *
+     * @return resource id for the corresponding icon. -1 if no relation is found.
+     */
+    public static int getSmallArtResourceIdForWeatherCondition(int weatherId) {
+
+        /*
+         * Based on weather code data for Open Weather Map.
+         */
+        if (weatherId >= 200 && weatherId <= 232) {
+            return R.drawable.ic_storm;
+        } else if (weatherId >= 300 && weatherId <= 321) {
+            return R.drawable.ic_light_rain;
+        } else if (weatherId >= 500 && weatherId <= 504) {
+            return R.drawable.ic_rain;
+        } else if (weatherId == 511) {
+            return R.drawable.ic_snow;
+        } else if (weatherId >= 520 && weatherId <= 531) {
+            return R.drawable.ic_rain;
+        } else if (weatherId >= 600 && weatherId <= 622) {
+            return R.drawable.ic_snow;
+        } else if (weatherId >= 701 && weatherId <= 761) {
+            //return R.drawable.ic_fog;
+        } else if (weatherId == 761 || weatherId == 771 || weatherId == 781) {
+            return R.drawable.ic_storm;
+        } else if (weatherId == 800) {
+            return R.drawable.ic_clear;
+        } else if (weatherId == 801) {
+            return R.drawable.ic_light_clouds;
+        } else if (weatherId >= 802 && weatherId <= 804) {
+            return R.drawable.ic_cloudy;
+        } else if (weatherId >= 900 && weatherId <= 906) {
+            return R.drawable.ic_storm;
+        } else if (weatherId >= 958 && weatherId <= 962) {
+            return R.drawable.ic_storm;
+        } else if (weatherId >= 951 && weatherId <= 957) {
+            return R.drawable.ic_clear;
+        }
+
+        Log.e(LOG_TAG, "Unknown Weather: " + weatherId);
+        return R.drawable.ic_storm;
     }
 
    /* public class WeatherListenerService extends WearableListenerService{
