@@ -64,6 +64,7 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -149,6 +150,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
         boolean mAmbient;
         Calendar mCalendar;
+        Date mDate;
+
         String mDateString;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
@@ -210,6 +213,11 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
+
+            mCalendar = Calendar.getInstance();
+            mDate = new Date();
+
+            simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
 
         }
 
@@ -340,9 +348,12 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
+            mDate.setTime(now);
 
             String hour = String.format("%d", mCalendar.get(Calendar.HOUR));
             String minutes = String.format("%02d", mCalendar.get(Calendar.MINUTE));
+
+            mDateString = simpleDateFormat.format(mDate);
 
             hour_textView.setText(hour);
             minute_textView.setText(minutes);
