@@ -61,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 import static android.R.attr.icon;
 import static android.R.attr.resource;
 import static android.R.attr.x;
+import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.decodeResource;
 
 /**
@@ -385,13 +386,13 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             canvas.drawText(mDateString.toUpperCase(), bounds.centerX() - ((mDatePaint.measureText(mDateString)/2)), mYOffset + 16, mDatePaint);
 
-            canvas.drawLine(bounds.centerX(), bounds.centerY(), bounds.centerX() + 20f, bounds.centerY(), mDividerPaint);
+            canvas.drawLine(bounds.centerX() - 20f, bounds.centerY(), bounds.centerX() + 20f, bounds.centerY(), mDividerPaint);
 
-            canvas.drawText(mMaxTemp, bounds.centerX(), bounds.centerY() + 20f, mHighPaint);
-            canvas.drawText(mMinTemp, bounds.centerX()+20f, bounds.centerY() + 20f, mLowPaint);
+            canvas.drawText(mMaxTemp, bounds.centerX(), bounds.centerY() + 40f, mHighPaint);
+            canvas.drawText(mMinTemp, bounds.centerX() + 20f, bounds.centerY() + 40f, mLowPaint);
 
             if(mIconBitmap != null){
-                canvas.drawBitmap(mIconBitmap, bounds.centerX(), bounds.centerY(), null);
+                canvas.drawBitmap(mIconBitmap, bounds.centerX()/2, (bounds.centerY()), null);
             }
         }
 
@@ -427,34 +428,10 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             }
         }
 
-        /*public Bitmap loadBitmapFromAsset(Asset asset) {
-            if (asset == null) {
-                throw new IllegalArgumentException("Asset must be non-null");
-            }
-            ConnectionResult result =
-                    mGoogleApiClient.blockingConnect(30, TimeUnit.MILLISECONDS);
-            if (!result.isSuccess()) {
-                return null;
-            }
-            // convert asset into a file descriptor and block until it's ready
-            InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
-                    mGoogleApiClient, asset).await().getInputStream();
-            mGoogleApiClient.disconnect();
-
-            if (assetInputStream == null) {
-                Log.w(LOG_TAG, "Requested an unknown Asset.");
-                return null;
-            }
-            // decode the stream into a bitmap
-            return BitmapFactory.decodeStream(assetInputStream);
-        }
-*/
         public Bitmap loadBitmap (int iconId){
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
                     iconId);
-
-
-            return Bitmap.createScaledBitmap(bitmap, 25, 25, true);
+            return Bitmap.createBitmap(bitmap);
         }
 
         @Override
