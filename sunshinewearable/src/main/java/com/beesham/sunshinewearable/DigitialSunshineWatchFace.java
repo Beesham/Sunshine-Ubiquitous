@@ -90,6 +90,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
     String mMinTemp = "0";
     String mMaxTemp = "0";
+    int mIconID;
     Bitmap mIconBitmap;
 
     private int specW, specH;
@@ -145,15 +146,6 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
         boolean mRegisteredTimeZoneReceiver = false;
 
         Paint mBackgroundPaint;
-        //Paint mTextPaint;
-        Paint mHourPaint;
-        Paint mMinutePaint;
-        Paint mDatePaint;
-        Paint mHighPaint;
-        Paint mLowPaint;
-        Paint mIconPaint; //TODO
-        Paint mColonPaint;
-        Paint mDividerPaint;
 
         boolean mAmbient;
         Calendar mCalendar;
@@ -219,65 +211,12 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
-            //mTextPaint = new Paint();
-            //mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
-
-            mHourPaint = new Paint();
-            mHourPaint = createTextPaint(resources.getColor(R.color.white), NORMAL_TYPEFACE);
-
-            mColonPaint = new Paint();
-            mColonPaint = createTextPaint(resources.getColor(R.color.white), NORMAL_TYPEFACE);
-
-            mMinutePaint = new Paint();
-            mMinutePaint = createTextPaint(resources.getColor(R.color.white), THIN_TYPEFACE);
-
-            mDatePaint = new Paint();
-            mDatePaint = createTextPaint(resources.getColor(R.color.light_grey));
-
-            mCalendar = Calendar.getInstance();
-
-            simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
-            mDateString = simpleDateFormat.format(mCalendar.DATE);
-
-            mDividerPaint = new Paint();
-            mDividerPaint = createDividerPaint();
-
-            mHighPaint = new Paint();
-            mHighPaint = createTextPaint(resources.getColor(R.color.light_grey));
-
-            mLowPaint = new Paint();
-            mLowPaint = createTextPaint(resources.getColor(R.color.light_grey));
-
         }
 
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
             super.onDestroy();
-        }
-
-        private Paint createDividerPaint(){
-            Paint paint = new Paint();
-            paint.setStrokeWidth(1f);
-            paint.setColor(getResources().getColor(R.color.light_grey));
-
-            return paint;
-        }
-
-        private Paint createTextPaint(int textColor) {
-            Paint paint = new Paint();
-            paint.setColor(textColor);
-            paint.setTypeface(NORMAL_TYPEFACE);
-            paint.setAntiAlias(true);
-            return paint;
-        }
-
-        private Paint createTextPaint(int defaultInteractiveColor, Typeface typeface) {
-            Paint paint = new Paint();
-            paint.setColor(defaultInteractiveColor);
-            paint.setTypeface(typeface);
-            paint.setAntiAlias(true);
-            return paint;
         }
 
         @Override
@@ -333,11 +272,6 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                     ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
             float textSize = resources.getDimension(isRound
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
-
-            mHourPaint.setTextSize(textSize);
-            mColonPaint.setTextSize(textSize);
-            mMinutePaint.setTextSize(textSize);
-
         }
 
         @Override
@@ -358,9 +292,9 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
-                    mHourPaint.setAntiAlias(!inAmbientMode);
+                   /* mHourPaint.setAntiAlias(!inAmbientMode);
                     mColonPaint.setAntiAlias(!inAmbientMode);
-                    mMinutePaint.setAntiAlias(!inAmbientMode);
+                    mMinutePaint.setAntiAlias(!inAmbientMode);*/
                 }
                 invalidate();
             }
@@ -410,34 +344,10 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             String hour = String.format("%d", mCalendar.get(Calendar.HOUR));
             String minutes = String.format("%02d", mCalendar.get(Calendar.MINUTE));
 
-           /* float xOffset =
-                    (mHourPaint.measureText(hour) +
-                    mColonPaint.measureText(":") +
-                    mMinutePaint.measureText(minutes));//mXOffset;
-
-            canvas.drawText(hour, bounds.centerX() - (xOffset/2f), mYOffset, mHourPaint);
-
-            //xOffset += mHourPaint.measureText(hour);
-            canvas.drawText(":", bounds.centerX() - (mColonPaint.measureText(":")/2f), mYOffset, mColonPaint);
-
-            //xOffset += mColonPaint.measureText(":");
-            canvas.drawText(minutes, bounds.centerX() + (mColonPaint.measureText(":")), mYOffset, mMinutePaint);
-
-            canvas.drawText(mDateString.toUpperCase(), bounds.centerX() - ((mDatePaint.measureText(mDateString)/2)), mYOffset + 16, mDatePaint);
-
-            canvas.drawLine(bounds.centerX() - 20f, bounds.centerY(), bounds.centerX() + 20f, bounds.centerY(), mDividerPaint);
-
-            canvas.drawText(mMaxTemp, bounds.centerX(), bounds.centerY() + 40f, mHighPaint);
-            canvas.drawText(mMinTemp, bounds.centerX() + 20f, bounds.centerY() + 40f, mLowPaint);
-
-            if(mIconBitmap != null){
-                canvas.drawBitmap(mIconBitmap, bounds.centerX()/2, (bounds.centerY()), null);
-            }*/
-
             hour_textView.setText(hour);
             minute_textView.setText(minutes);
             date_textView.setText(mDateString.toUpperCase());
-            //imageView
+            weatherIcon_imageView.setImageResource(mIconID);
             tempHigh_textView.setText(mMaxTemp);
             tempLow_textView.setText(mMinTemp);
 
@@ -445,7 +355,6 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             watchfaceRoundLayout.layout(0, 0, watchfaceRoundLayout.getMeasuredWidth(),
                     watchfaceRoundLayout.getMeasuredHeight());
 
-            canvas.drawColor(Color.BLACK);
             watchfaceRoundLayout.draw(canvas);
         }
 
@@ -517,10 +426,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                     if(path.equals("/weather")){
                         mMinTemp = dataMap.getString("weather.min");
                         mMaxTemp = dataMap.getString("weather.max");
-                        //Asset iconAsset = dataMap.getAsset("icon");
-                        mIconBitmap = loadBitmap(
-                                getSmallArtResourceIdForWeatherCondition(
-                                        dataMap.getInt("iconID")));
+                        mIconID = getSmallArtResourceIdForWeatherCondition(dataMap.getInt("iconID"));
                         Log.v(LOG_TAG, "data on wearable");
                     }
                 }
@@ -582,23 +488,4 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
         return R.drawable.ic_storm;
     }
 
-   /* public class WeatherListenerService extends WearableListenerService{
-        @Override
-        public void onDataChanged(DataEventBuffer dataEventBuffer) {
-            super.onDataChanged(dataEventBuffer);
-            Log.v(LOG_TAG, "in On data changed");
-
-            for(DataEvent dataEvent : dataEventBuffer){
-                if(dataEvent.getType() == DataEvent.TYPE_CHANGED){
-                    DataMap dataMap = DataMapItem.fromDataItem(
-                            dataEvent.getDataItem()).getDataMap();
-                    String path = dataEvent.getDataItem().getUri().getPath();
-                    if(path.equals("/weather")){
-                        minTemp = dataMap.getString("weather.min");
-                        Log.v(LOG_TAG, "data on wearable");
-                    }
-                }
-            }
-        }
-    }*/
 }
