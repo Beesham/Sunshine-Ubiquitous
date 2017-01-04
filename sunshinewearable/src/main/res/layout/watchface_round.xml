@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_marginTop="20dp"
+              android:layout_marginLeft="20dp"
+              android:layout_marginRight="20dp">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+        <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/hour_text_view"
+                tools:text="15"
+                android:textSize="36sp"/>
+
+        <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/colon_text_view"
+                tools:text=":"
+                android:textSize="36sp"/>
+
+        <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/minutes_text_view"
+                tools:text="30"
+                android:textSize="36sp"
+                android:fontFamily="sans-serif-thin"/>
+    </LinearLayout>
+
+    <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:id="@+id/date_text_view"
+            tools:text="FRI, JUL 14 2017"
+            android:textAppearance="@style/TextAppearance.Wearable.Small"
+            />
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp">
+
+        <View
+                android:layout_width="45dp"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+    </RelativeLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <ImageView
+                android:src="@drawable/ic_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/weather_icon_image_view"
+                android:layout_weight="1"/>
+
+        <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:id="@+id/tempHigh_text_view"
+                android:layout_weight="1"
+                tools:text="25*"
+                android:textAppearance="@style/TextAppearance.Wearable.Medium"
+                android:textColor="@color/primary_text_dark"/>
+
+        <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:id="@+id/tempLow_text_view"
+                android:layout_weight="1"
+                tools:text="16*"
+                android:textAppearance="@style/TextAppearance.Wearable.Medium"
+                android:fontFamily="sans-serif-thin"/>
+    </LinearLayout>
+</LinearLayout>
