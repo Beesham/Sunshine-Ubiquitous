@@ -37,6 +37,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -47,9 +48,17 @@ import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
+import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
+import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -83,6 +92,15 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
     String mMaxTemp = "0";
     Bitmap mIconBitmap;
 
+    private int specW, specH;
+    private View watchfaceRoundLayout;
+    private TextView date_textView;
+    private TextView hour_textView;
+    private TextView  minute_textView;
+    private ImageView weatherIcon_imageView;
+    private TextView tempHigh_textView;
+    private TextView tempLow_textView;
+    private final Point displaySize = new Point();
 
     /**
      * Update rate in milliseconds for interactive mode. We update once a second since seconds are
@@ -167,6 +185,27 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
+
+            LayoutInflater inflater =
+                    (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            watchfaceRoundLayout = inflater.inflate(R.layout.watchface_round, null);
+
+            Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
+                    .getDefaultDisplay();
+            display.getSize(displaySize);
+
+            specW = View.MeasureSpec.makeMeasureSpec(displaySize.x,
+                    View.MeasureSpec.EXACTLY);
+            specH = View.MeasureSpec.makeMeasureSpec(displaySize.y,
+                    View.MeasureSpec.EXACTLY);
+
+            date_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.date_text_view);
+            hour_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.hour_text_view);
+            minute_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.minutes_text_view);
+            weatherIcon_imageView = (ImageView) watchfaceRoundLayout.findViewById(R.id.weather_icon_image_view);
+            tempHigh_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.tempHigh_text_view);
+            tempLow_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.tempLow_text_view);
+
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitialSunshineWatchFace.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
@@ -371,7 +410,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             String hour = String.format("%d", mCalendar.get(Calendar.HOUR));
             String minutes = String.format("%02d", mCalendar.get(Calendar.MINUTE));
 
-            float xOffset =
+           /* float xOffset =
                     (mHourPaint.measureText(hour) +
                     mColonPaint.measureText(":") +
                     mMinutePaint.measureText(minutes));//mXOffset;
@@ -393,7 +432,21 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             if(mIconBitmap != null){
                 canvas.drawBitmap(mIconBitmap, bounds.centerX()/2, (bounds.centerY()), null);
-            }
+            }*/
+
+            hour_textView.setText(hour);
+            minute_textView.setText(minutes);
+            date_textView.setText(mDateString.toUpperCase());
+            //imageView
+            tempHigh_textView.setText(mMaxTemp);
+            tempLow_textView.setText(mMinTemp);
+
+            watchfaceRoundLayout.measure(specW, specH);
+            watchfaceRoundLayout.layout(0, 0, watchfaceRoundLayout.getMeasuredWidth(),
+                    watchfaceRoundLayout.getMeasuredHeight());
+
+            canvas.drawColor(Color.BLACK);
+            watchfaceRoundLayout.draw(canvas);
         }
 
         /**
