@@ -73,6 +73,9 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
 
     private static final String WEATHER_MIN_DATA_KEY = "weather.min";
     private static final String WEATHER_MAX_DATA_KEY = "weather.max";
+    private static final String ICON_ID_DATA_KEY = "iconID";
+    private static final String WEATHER_DATA_PATH = "/weather";
+
 
     public void sendWeatherData(){
 
@@ -95,11 +98,11 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
 
         int weatherId = c.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID);
 
-        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/weather");
+        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(WEATHER_DATA_PATH);
         putDataMapRequest.getDataMap().putString(WEATHER_MAX_DATA_KEY, highString);
         putDataMapRequest.getDataMap().putString(WEATHER_MIN_DATA_KEY, lowString);
-        putDataMapRequest.getDataMap().putLong("time_stamp", System.currentTimeMillis());
-        putDataMapRequest.getDataMap().putInt("iconID", weatherId);
+        //putDataMapRequest.getDataMap().putLong("time_stamp", System.currentTimeMillis());
+        putDataMapRequest.getDataMap().putInt(ICON_ID_DATA_KEY, weatherId);
 
         PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
         Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest)

@@ -70,6 +70,12 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
     private static final String LOG_TAG = DigitialSunshineWatchFace.class.getSimpleName();
 
+    private static final String WEATHER_DATA_PATH = "/weather";
+    private static final String WEATHER_MIN_DATA_KEY = "weather.min";
+    private static final String WEATHER_MAX_DATA_KEY = "weather.max";
+    private static final String ICON_ID_DATA_KEY = "iconID";
+
+
     String mMinTemp = "0";
     String mMaxTemp = "0";
     int mIconID;
@@ -297,10 +303,6 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                     break;
                 case TAP_TYPE_TAP:
                     // The user has completed the tap gesture.
-                    // TODO: Add code to handle the tap gesture.
-                    Toast.makeText(getApplicationContext(), R.string.message, Toast.LENGTH_SHORT)
-                            .show();
-                    Log.v(LOG_TAG, "Face tapped");
                     break;
             }
             invalidate();
@@ -397,12 +399,10 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
                     DataMap dataMap = DataMapItem.fromDataItem(
                             dataEvent.getDataItem()).getDataMap();
                     String path = dataEvent.getDataItem().getUri().getPath();
-                    if(path.equals("/weather")){
-                        mMinTemp = dataMap.getString("weather.min").trim();
-                        mMaxTemp = dataMap.getString("weather.max").trim();
-                        Log.v(LOG_TAG, "minTemp, maxTemp " + mMinTemp.trim() + mMaxTemp.trim());
-                        mIconID = getSmallArtResourceIdForWeatherCondition(dataMap.getInt("iconID"));
-                        Log.v(LOG_TAG, "data on wearable");
+                    if(path.equals(WEATHER_DATA_PATH)){
+                        mMinTemp = dataMap.getString(WEATHER_MIN_DATA_KEY).trim();
+                        mMaxTemp = dataMap.getString(WEATHER_MAX_DATA_KEY).trim();
+                        mIconID = getSmallArtResourceIdForWeatherCondition(dataMap.getInt(ICON_ID_DATA_KEY));
                     }
                 }
             }
