@@ -47,6 +47,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -73,6 +74,7 @@ import static android.R.attr.resource;
 import static android.R.attr.x;
 import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.decodeResource;
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
@@ -82,17 +84,9 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
     private static final String LOG_TAG = DigitialSunshineWatchFace.class.getSimpleName();
 
-    private static final Typeface NORMAL_TYPEFACE =
-            Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
-    private static final Typeface BOLD_TYPEFACE =
-            Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
-    private static final Typeface THIN_TYPEFACE =
-            Typeface.create("sans-serif-light", Typeface.NORMAL);
-
     String mMinTemp = "0";
     String mMaxTemp = "0";
     int mIconID;
-    Bitmap mIconBitmap;
 
     private int specW, specH;
     private View watchfaceRoundLayout;
@@ -341,8 +335,14 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             // Draw the background.
             if (isInAmbientMode()) {
                 canvas.drawColor(Color.BLACK);
+                weatherIcon_imageView.setVisibility(View.GONE);
+                tempHigh_textView.setVisibility(View.GONE);
+                tempLow_textView.setVisibility(View.GONE);
             } else {
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+                weatherIcon_imageView.setVisibility(View.VISIBLE);
+                tempHigh_textView.setVisibility(View.VISIBLE);
+                tempLow_textView.setVisibility(View.VISIBLE);
             }
 
             // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
@@ -350,7 +350,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             mCalendar.setTimeInMillis(now);
             mDate.setTime(now);
 
-            String hour = String.format("%d", mCalendar.get(Calendar.HOUR));
+            String hour = String.format("%02d", mCalendar.get(Calendar.HOUR_OF_DAY));
             String minutes = String.format("%02d", mCalendar.get(Calendar.MINUTE));
 
             mDateString = simpleDateFormat.format(mDate);

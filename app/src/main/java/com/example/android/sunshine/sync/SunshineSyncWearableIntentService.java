@@ -86,38 +86,14 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
                 sortOrder);
 
         c.moveToFirst();
-
-        /**************************
-         * High (max) temperature *
-         **************************/
-         /* Read high temperature from the cursor (in degrees celsius) */
         double highInCelsius = c.getDouble(MainActivity.INDEX_WEATHER_MAX_TEMP);
-         /*
-          * If the user's preference for weather is fahrenheit, formatTemperature will convert
-          * the temperature. This method will also append either °C or °F to the temperature
-          * String.
-          */
         String highString = SunshineWeatherUtils.formatTemperature(this, highInCelsius);
 
-        /*************************
-         * Low (min) temperature *
-         *************************/
-         /* Read low temperature from the cursor (in degrees celsius) */
         double lowInCelsius = c.getDouble(MainActivity.INDEX_WEATHER_MIN_TEMP);
-         /*
-          * If the user's preference for weather is fahrenheit, formatTemperature will convert
-          * the temperature. This method will also append either °C or °F to the temperature
-          * String.
-          */
         String lowString = SunshineWeatherUtils.formatTemperature(this, lowInCelsius);
 
 
         int weatherId = c.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID);
-        int weatherImageId;
-
-        weatherImageId = SunshineWeatherUtils.getSmallArtResourceIdForWeatherCondition(weatherId);
-
-        //Bitmap icon = BitmapFactory.decodeResource(getResources(), weatherImageId);
 
         PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/weather");
         putDataMapRequest.getDataMap().putString(WEATHER_MAX_DATA_KEY, highString);
@@ -131,34 +107,23 @@ public class SunshineSyncWearableIntentService extends IntentService implements 
                     @Override
                     public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
                         if(!dataItemResult.getStatus().isSuccess()){
-                            Log.v(LOG_TAG, "not Sucess stored locally");
                         }else{
-                            Log.v(LOG_TAG, "sucess stored locally" );
                         }
                     }
                 });
     }
 
-    /*private static Asset createAssetFromBitmap(Bitmap bitmap) {
-        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
-        return Asset.createFromBytes(byteStream.toByteArray());
-    }
-*/
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.v(LOG_TAG, "Connected");
         sendWeatherData();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.v(LOG_TAG, "Failed Connect");
     }
 
     @Override
