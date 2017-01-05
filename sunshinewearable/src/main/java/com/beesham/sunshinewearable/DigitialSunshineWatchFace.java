@@ -18,28 +18,23 @@ package com.beesham.sunshinewearable;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
-import com.google.android.gms.wearable.WearableListenerService;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -47,7 +42,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -59,9 +53,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -69,12 +60,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import static android.R.attr.icon;
-import static android.R.attr.resource;
-import static android.R.attr.x;
-import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.decodeResource;
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
@@ -89,7 +75,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
     int mIconID;
 
     private int specW, specH;
-    private View watchfaceRoundLayout;
+    private View mWatchfaceLayout;
     private TextView date_textView;
     private TextView hour_textView;
     private TextView  minute_textView;
@@ -177,7 +163,7 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
 
             LayoutInflater inflater =
                     (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            watchfaceRoundLayout = inflater.inflate(R.layout.watchface_round, null);
+            mWatchfaceLayout = inflater.inflate(R.layout.watchface, null);
 
             Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
                     .getDefaultDisplay();
@@ -188,12 +174,12 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             specH = View.MeasureSpec.makeMeasureSpec(displaySize.y,
                     View.MeasureSpec.EXACTLY);
 
-            date_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.date_text_view);
-            hour_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.hour_text_view);
-            minute_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.minutes_text_view);
-            weatherIcon_imageView = (ImageView) watchfaceRoundLayout.findViewById(R.id.weather_icon_image_view);
-            tempHigh_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.tempHigh_text_view);
-            tempLow_textView = (TextView) watchfaceRoundLayout.findViewById(R.id.tempLow_text_view);
+            date_textView = (TextView) mWatchfaceLayout.findViewById(R.id.date_text_view);
+            hour_textView = (TextView) mWatchfaceLayout.findViewById(R.id.hour_text_view);
+            minute_textView = (TextView) mWatchfaceLayout.findViewById(R.id.minutes_text_view);
+            weatherIcon_imageView = (ImageView) mWatchfaceLayout.findViewById(R.id.weather_icon_image_view);
+            tempHigh_textView = (TextView) mWatchfaceLayout.findViewById(R.id.tempHigh_text_view);
+            tempLow_textView = (TextView) mWatchfaceLayout.findViewById(R.id.tempLow_text_view);
 
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitialSunshineWatchFace.this)
@@ -212,7 +198,6 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             mDate = new Date();
 
             simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
-
         }
 
         @Override
@@ -266,14 +251,6 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
-
-            // Load resources that have alternate values for round watches.
-            Resources resources = DigitialSunshineWatchFace.this.getResources();
-            boolean isRound = insets.isRound();
-            mXOffset = resources.getDimension(isRound
-                    ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
-            float textSize = resources.getDimension(isRound
-                    ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
         }
 
         @Override
@@ -294,9 +271,8 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
-                   /* mHourPaint.setAntiAlias(!inAmbientMode);
-                    mColonPaint.setAntiAlias(!inAmbientMode);
-                    mMinutePaint.setAntiAlias(!inAmbientMode);*/
+                    hour_textView.getPaint().setAntiAlias(!inAmbientMode);
+                    minute_textView.getPaint().setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -362,11 +338,11 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             tempHigh_textView.setText(mMaxTemp);
             tempLow_textView.setText(mMinTemp);
 
-            watchfaceRoundLayout.measure(specW, specH);
-            watchfaceRoundLayout.layout(0, 0, watchfaceRoundLayout.getMeasuredWidth(),
-                    watchfaceRoundLayout.getMeasuredHeight());
+            mWatchfaceLayout.measure(specW, specH);
+            mWatchfaceLayout.layout(0, 0, mWatchfaceLayout.getMeasuredWidth(),
+                    mWatchfaceLayout.getMeasuredHeight());
 
-            watchfaceRoundLayout.draw(canvas);
+            mWatchfaceLayout.draw(canvas);
         }
 
         /**
@@ -401,42 +377,30 @@ public class DigitialSunshineWatchFace extends CanvasWatchFaceService {
             }
         }
 
-        public Bitmap loadBitmap (int iconId){
-            Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
-                    iconId);
-            return Bitmap.createBitmap(bitmap);
-        }
-
         @Override
         public void onConnected(@Nullable Bundle bundle) {
-            Log.v(LOG_TAG, "connected");
-            Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_SHORT)
-                    .show();
             Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
         }
 
         @Override
         public void onConnectionSuspended(int i) {
-            Log.v(LOG_TAG, "connect sus");
         }
 
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            Log.v(LOG_TAG, "connect failed");
         }
 
         @Override
         public void onDataChanged(DataEventBuffer dataEventBuffer) {
-            Log.v(LOG_TAG, "onDataChanged");
-
             for(DataEvent dataEvent : dataEventBuffer){
                 if(dataEvent.getType() == DataEvent.TYPE_CHANGED){
                     DataMap dataMap = DataMapItem.fromDataItem(
                             dataEvent.getDataItem()).getDataMap();
                     String path = dataEvent.getDataItem().getUri().getPath();
                     if(path.equals("/weather")){
-                        mMinTemp = dataMap.getString("weather.min");
-                        mMaxTemp = dataMap.getString("weather.max");
+                        mMinTemp = dataMap.getString("weather.min").trim();
+                        mMaxTemp = dataMap.getString("weather.max").trim();
+                        Log.v(LOG_TAG, "minTemp, maxTemp " + mMinTemp.trim() + mMaxTemp.trim());
                         mIconID = getSmallArtResourceIdForWeatherCondition(dataMap.getInt("iconID"));
                         Log.v(LOG_TAG, "data on wearable");
                     }
